@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>账号管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/public.css" media="all">
+    <link rel="stylesheet" type="text/css" href="layui/css/layui.css" />
+    <script src="layui/layui.js"></script>
+</head>
+<body>
+
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <blockquote class="layui-elem-quote layui-text">
+            账号管理页面
+        </blockquote>
+        <!-- 顶部搜索框 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="id" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">游客账号</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="youkezhanghao" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">邮箱</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="youxiang" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn">
+                                <i class="layui-icon layui-icon-search"></i>搜索
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+        <!-- 顶部搜索框结束 -->
+        <!--        顶部按钮开始-->
+
+        <!--        顶部按钮结束-->
+        <!-- 表格开始 -->
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        <!-- 表格结束 -->
+
+
+        <!-- 侧边操作按钮 -->
+        <script type="text/html" id="currentTableBar">
+            <div class="layui-clear-space">
+            <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="detail">查看</a>
+            <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="reset">重置</a>
+            <a class="layui-btn layui-btn-xs layui-btn" lay-event="ban">封禁</a>
+            <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="unban">解封</a>
+            </div>
+        </script>
+        <!--        侧边操作按钮结束-->
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table', 'layer','upload'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            layer = layui.layer;
+
+        // 初始化表格
+        $.ajax({
+            url: '/account?method=list',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                table.render({
+                    elem: '#currentTableId',
+                    toolbar: '#toolbarDemo',
+                    cols: [[
+                        {field: 'id', width: 120, title: 'ID', sort: true},
+                        {field: 'youkezhanghao', width: 120, title: '游客账号'},
+                        {field: 'youxiang', width: 180, title: '邮箱', sort: true},
+                        {field:'lianxifangshi',width:180,title:'联系方式',sort:true},
+                        {field:'is_bannedStr',width:120,title:'封禁状态',sort:true},
+                        {title: '操作', minWidth: 160, toolbar: '#currentTableBar', align: "center"}
+                    ]],
+                    data: data,
+                    limits: [10, 15, 20, 25, 50, 100],
+                    limit: 20,
+                    page: true,
+                    skin: 'line'
+                });
+            }
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            let searchParams = data.field;
+
+            //执行重载
+            table.reload('currentTableId', {
+                page: {curr: 1},
+                url: '/account?method=search',
+                where: searchParams,
+                method: 'POST',
+                parseData: function (res) {
+                    return {
+                        "code": 0,
+                        "data": res.data
+                    };
+                }
+            });
+            return false;
+        });
+        /**
+         * 顶部按钮监听事件
+         */
+
+        // 操作栏事件监听
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            //这里的edit和delete要和你table里面的lay-event的值一样
+            if (obj.event === 'detail') {
+                var index = layer.open({
+                    type: 1,
+                    title: '查看',
+                    area: ['500px', '600px'],
+                    content: `
+    <form class="layui-form" style="padding: 20px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">ID</label>
+            <div class="layui-input-block">
+                <input type="text" name="id" value="${data.id}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">游客账号</label>
+            <div class="layui-input-block">
+                <input type="text" name="youkezhanghao" value="${data.youkezhanghao}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">游客姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="youkexingming" value="${data.youkexingming}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                <input type="text" name="xingbie" value="${data.xingbie}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系方式</label>
+            <div class="layui-input-block">
+                <input type="text" name="lianxifangshi" value="${data.lianxifangshi}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">身份证</label>
+            <div class="layui-input-block">
+                <input type="text" name="shenfenzheng" value="${data.shenfenzheng}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="youxiang" value="${data.youxiang}" disabled class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">封禁状态</label>
+            <div class="layui-input-block">
+                <input type="text" name="is_bannedStr" value="${data.is_bannedStr}" disabled class="layui-input">
+            </div>
+        </div>
+    </form>
+    `
+                });
+            } else if (obj.event === 'ban') {
+                $.ajax({
+                    url: '/account?method=checkBan',
+                    method: 'POST',
+                    data: {youkezhanghao: data.youkezhanghao},
+                    success: function (response) {
+                        if (response.result) {
+                            layer.alert('该用户已被封禁', {btn: ['确认'], closeBtn: 0}, function () {
+                                location.reload();
+                            });
+                        } else {
+                            var index = layer.open({
+                                type: 1,
+                                title: '封禁用户',
+                                area: ['500px', '300px'],
+                                content: '<div style="padding: 20px;">' +
+                                    '<form id="banForm">' +
+                                    '<div class="layui-form-item">' +
+                                    '<label class="layui-form-label">封禁原因</label>' +
+                                    '<div class="layui-input-block">' +
+                                    '<input type="text" name="reason" required placeholder="请输入封禁原因" class="layui-input">' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '<div class="layui-form-item">' +
+                                    '<label class="layui-form-label">封禁类型</label>' +
+                                    '<div class="layui-input-block">' +
+                                    '<select name="type" required>' +
+                                    '<option value="0">永久</option>' +
+                                    '<option value="1">1小时</option>' +
+                                    '<option value="2">1天</option>' +
+                                    '<option value="3">1月</option>' +
+                                    '<option value="4">1年</option>' +
+                                    '</select>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</form>' +
+                                    '</div>',
+                                btn: ['确认'],
+                                yes: function (index, layero) {
+                                    var reason = layero.find('input[name="reason"]').val();
+                                    var type = layero.find('select[name="type"]').val();
+                                    if (reason && type) {
+                                        layer.confirm('是否确认封禁该用户？', function (confirmIndex) {
+                                            $.ajax({
+                                                url: '/account?method=ban',
+                                                method: 'POST',
+                                                data: {id: data.id, reason: reason, type: type},
+                                                success: function () {
+                                                    layer.msg('封禁成功');
+                                                    location.reload();
+                                                }
+                                            });
+                                            layer.close(confirmIndex);
+                                        });
+                                        layer.close(index);
+                                    } else {
+                                        layer.msg('请填写封禁原因和选择封禁类型');
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            } else if (obj.event === 'unban') {
+                $.ajax({
+                    url: '/account?method=checkBan',
+                    method: 'POST',
+                    data: {youkezhanghao: data.youkezhanghao},
+                    success: function (response) {
+                        if (!response.result) {
+                            layer.alert('该用户已被解封', {btn: ['确认'], closeBtn: 0}, function () {
+                                location.reload();
+                            });
+                        } else {
+                            layer.confirm('是否确认解封该用户？', function (confirmIndex) {
+                                $.ajax({
+                                    url: '/account?method=unban',
+                                    method: 'POST',
+                                    data: {id: data.id},
+                                    success: function () {
+                                        layer.msg('解封成功');
+                                        location.reload();
+                                    }
+                                });
+                                layer.close(confirmIndex);
+                            });
+                        }
+                    }
+                });
+            } else if (obj.event === "reset") {
+                layer.confirm('确定要重置该用户的密码吗？', {icon: 3, title: '重置确认'}, function (index) {
+                    $.ajax({
+                        url: '/account?method=reset&id=' + data.id,
+                        method: 'POST',
+                        success: function (result) {
+                            layer.msg('重置成功');
+                            location.reload();
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

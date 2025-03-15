@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录界面 - 哪去旅游网</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <style>
+        /* 页面背景色调整为渐变蓝色 */
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb); /* 蓝色系渐变 */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            font-size: 36px; /* 放大标题 */
+            color: #1565c0; /* 深蓝色标题文字 */
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        /* 登录框样式 */
+        .login-box {
+            max-width: 400px;
+            width: 90%; /* 响应式支持 */
+            padding: 30px 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* 增加卡片阴影效果 */
+        }
+
+        /* 输入框样式 */
+        .login-box .layui-input {
+            border-radius: 5px;
+            border: 1px solid #90caf9; /* 边框为浅蓝色 */
+        }
+
+        /* 按钮样式 */
+        .login-box .layui-btn {
+            background-color: #1565c0 !important; /* 深蓝色按钮 */
+            color: #ffffff;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .login-box .layui-btn:hover {
+            background-color: #0d47a1 !important; /* 鼠标悬停时按钮颜色加深 */
+        }
+
+        /* 表单间距 */
+        .login-box .layui-form-item {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>哪去旅游网后台管理</h1> <!-- 标题单独居中放大显示 -->
+
+<div class="login-box">
+    <form class="layui-form">
+        <div class="demo-login-container">
+            <div class="layui-form-item">
+                <div class="layui-input-wrap">
+                    <div class="layui-input-prefix">
+                        <i class="layui-icon layui-icon-username"></i>
+                    </div>
+                    <input type="text" name="username" required lay-verify="required" placeholder="请输入用户账号" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-wrap">
+                    <div class="layui-input-prefix">
+                        <i class="layui-icon layui-icon-password"></i>
+                    </div>
+                    <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="remember" lay-skin="primary" title="记住密码">
+                <a href="#forget" style="float: right; margin-top: 7px;">忘记密码？</a>
+            </div>
+            <div class="layui-form-item">
+                <button class="layui-btn layui-btn-normal" id="login-btn" lay-submit lay-filter="login">登录</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script src="layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layer'], function(){
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.$;
+
+        // 监听登录按钮
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                $('#login-btn').click(); // 按回车触发登录按钮
+            }
+        });
+
+        $('#login-btn').on('click', function() {
+            var username = $('input[name="username"]').val();
+            var password = $('input[name="password"]').val();
+            var role = 'admin'; // 获取选择的角色
+
+            if (username === "" || password === "") {
+                layer.msg('请输入用户账号和密码！');
+                return;
+            }
+
+            // 根据角色选择跳转
+            if (role === 'admin') {
+                $.ajax({
+                    url: '/login?method=admin_login',
+                    type: 'POST',
+                    data: {
+                        username: username,
+                        password: password
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        console.log("yes");
+                        if (res.success === "true") {
+                            if (res.result === "true") {
+                                layer.msg('管理员登录成功！');
+                                window.location.href = 'index.html'; // 跳转至管理员主页
+                            } else {
+                                layer.msg('管理员密码错误！');
+                            }
+                        } else {
+                            layer.msg('管理员账号不存在或系统错误！');
+                        }
+                    }
+                });
+            }
+
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

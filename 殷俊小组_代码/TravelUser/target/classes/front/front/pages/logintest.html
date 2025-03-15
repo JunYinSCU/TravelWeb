@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录</title>
+  <link href="../css/layui.css" rel="stylesheet"> <!-- 引用 CSS -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f2f2f2;
+    }
+    .login-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-container {
+      width: 60%;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h1 {
+      color: black;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 50px;
+    }
+  </style>
+</head>
+<body>
+<div class="login-wrapper">
+  <h1>四川省省级生态县建设水平管理系统</h1>
+  <div class="login-container">
+    <form class="layui-form" method="post">
+      <div class="layui-form-item">
+        <div class="layui-input-wrap">
+          <div class="layui-input-prefix">
+            <i class="layui-icon layui-icon-username"></i>
+          </div>
+          <input type="text" name="account" lay-verify="required" placeholder="用户名" lay-reqtext="请填写用户名" autocomplete="off" class="layui-input" lay-affix="clear">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-input-wrap">
+          <div class="layui-input-prefix">
+            <i class="layui-icon layui-icon-password"></i>
+          </div>
+          <input type="password" name="password" lay-verify="required" placeholder="密码" lay-reqtext="请填写密码" autocomplete="off" class="layui-input" lay-affix="eye">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <input type="checkbox" name="remember" lay-skin="primary" title="记住密码">
+        <a href="#forget" style="float: right; margin-top: 7px;">忘记密码？</a>
+      </div>
+      <div class="layui-form-item">
+        <button class="layui-btn layui-btn-fluid layui-bg-blue" lay-submit lay-filter="demo-login">登录</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/layui.js"></script> <!-- 引用 JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  layui.use(function(){
+    var form = layui.form;
+    var layer = layui.layer;
+
+    form.on('submit(demo-login)', function(data){
+      var field = data.field;
+
+      // AJAX 请求后端验证
+      $.ajax({
+        url: 'http://localhost:8080/springboot073x3/login', // Spring Boot 后端 URL
+        type: 'POST',
+        data: field,
+        dataType: 'json',
+        success: function(response) {
+        //  输出登录成功到控制台
+            console.log(response);
+
+        },
+        error: function() {
+          console.log("no");
+        }
+      });
+
+      return false; // 阻止默认表单提交
+    });
+  });
+</script>
+
+</body>
+</html>
